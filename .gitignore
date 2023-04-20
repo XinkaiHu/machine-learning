@@ -3,6 +3,4 @@ Include/
 Lib/
 Scripts/
 pyvenv.cfg
-.hpp
-.cpp
-.exe
+*/*.txt
