@@ -3,6 +3,5 @@ Include/
 Lib/
 Scripts/
 pyvenv.cfg
-*/*.txt
-./.gitignore
 !requirements.txt
+share/
