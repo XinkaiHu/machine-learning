@@ -161,18 +161,18 @@ def multi_test(X: np.matrix, Y: np.array, weights: np.array, bias: np.array) -> 
 
 
 # 对西瓜数据集训练 weights 和 bias。
-X_training, Y_training = load_data('./dataset/melon_training.txt', ',')
-X_test, Y_test = load_data('./dataset/melon_test.txt', ',')
+X_training, Y_training = load_data('logistic-regression/dataset/melon_training.txt', ',')
+X_test, Y_test = load_data('logistic-regression/dataset/melon_test.txt', ',')
 if not os.path.exists('parameters.txt'):
     weights = np.random.rand(2)
     bias = np.random.rand(1)
 else:
-    weights, bias = load_parameters('parameters.txt')
+    weights, bias = load_parameters('logistic-regression/parameters.txt')
 lr = 0.05
 epoch = 10000
 for _ in range(epoch):
     gradient_descent(X=X_training, Y=Y_training, weights=weights, bias=bias, lr=lr)
-save_parameters('parameters.txt', weights=weights, bias=bias)
+save_parameters('logistic-regression/parameters.txt', weights=weights, bias=bias)
 
 
 print('---- My Logistic Regression ----\nWeights: \n{}\nBias: \n{}'.format(weights, bias))
@@ -185,7 +185,7 @@ print('---- sklearn ----\nWeights: \n{}\nBias: \n{}'.format(model.coef_, model.i
 
 
 # 对鸢尾花数据集分类。
-iris_X_test, iris_Y_test = load_data(file='dataset/iris_test.txt', sep=',')
+iris_X_test, iris_Y_test = load_data(file='logistic-regression/dataset/iris_test.txt', sep=',')
 iris_Y_test_0 = np.array(
     [np.float64(1.) if y == 0. else np.float64(0.) for y in iris_Y_test])
 iris_Y_test_1 = np.array(
@@ -194,7 +194,7 @@ iris_Y_test_2 = np.array(
     [np.float64(1.) if y == 2. else np.float64(0.) for y in iris_Y_test])
 
 iris_X_training, iris_Y_training = load_data(
-    file='dataset/iris_training.txt', sep=',')
+    file='logistic-regression/dataset/iris_training.txt', sep=',')
 iris_Y_training_0 = np.array(
     [np.float64(1.) if y == 0. else np.float64(0.) for y in iris_Y_training])
 iris_Y_training_1 = np.array(
@@ -202,18 +202,18 @@ iris_Y_training_1 = np.array(
 iris_Y_training_2 = np.array(
     [np.float64(1.) if y == 2. else np.float64(0.) for y in iris_Y_training])
 
-if not os.path.exists('parameters_0.txt'):
+if not os.path.exists('logistic-regression/parameters_0.txt'):
     weights_0, bias_0 = np.random.rand(4), np.random.rand(1)
 else:
-    weights_0, bias_0 = load_parameters('parameters_0.txt')
-if not os.path.exists('parameters_1.txt'):
+    weights_0, bias_0 = load_parameters('logistic-regression/parameters_0.txt')
+if not os.path.exists('logistic-regression/parameters_1.txt'):
     weights_1, bias_1 = np.random.rand(4), np.random.rand(1)
 else:
-    weights_1, bias_1 = load_parameters('parameters_1.txt')
-if not os.path.exists('parameters_2.txt'):
+    weights_1, bias_1 = load_parameters('logistic-regression/parameters_1.txt')
+if not os.path.exists('logistic-regression/parameters_2.txt'):
     weights_2, bias_2 = np.random.rand(4), np.random.rand(1)
 else:
-    weights_2, bias_2 = load_parameters('parameters_2.txt')
+    weights_2, bias_2 = load_parameters('logistic-regression/parameters_2.txt')
 
 lr = 0.01
 epoch = 100000
@@ -225,9 +225,9 @@ for _ in range(epoch):
     gradient_descent(X=iris_X_training, Y=iris_Y_training_2,
                      weights=weights_2, bias=bias_2, lr=lr)
 
-save_parameters('parameters_0.txt', weights=weights_0, bias=bias_0)
-save_parameters('parameters_1.txt', weights=weights_1, bias=bias_1)
-save_parameters('parameters_2.txt', weights=weights_2, bias=bias_2)
+save_parameters('logistic-regression/parameters_0.txt', weights=weights_0, bias=bias_0)
+save_parameters('logistic-regression/parameters_1.txt', weights=weights_1, bias=bias_1)
+save_parameters('logistic-regression/parameters_2.txt', weights=weights_2, bias=bias_2)
 
 weights = np.matrix([weights_0, weights_1, weights_2])
 bias = np.matrix([bias_0, bias_1, bias_2])
