@@ -4,3 +4,4 @@ Lib/
 Scripts/
 !requirements.txt
 share/
+pyvenv.cfg
