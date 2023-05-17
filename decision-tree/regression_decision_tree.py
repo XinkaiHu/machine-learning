@@ -20,7 +20,7 @@ class Node:
         self.right = right
 
 
-def load_data(file, sep, training_number, has_headers):
+def load_data(file, sep, training_number, has_headers: bool, shuffle: bool=True):
     """
     从文件中加载数据。要求数据文件每行包含一个样例且每行最后一个数据为样例标签。
     input:
@@ -28,6 +28,7 @@ def load_data(file, sep, training_number, has_headers):
         sep: 文件中每个特征的分隔符。
         training_number: 训练样本的个数、剩余的被分为测试样本。
         has_headers: 表示数据文件是否包含表头。
+        shuffle: 表示是否打乱数据集。默认为 True。
     output:
         X: 每行表示一个样本、每列表示一个样本特征的矩阵。
         Y: 每行表示一个样本标签、列数为 1 的向量。
@@ -46,7 +47,8 @@ def load_data(file, sep, training_number, has_headers):
     X = data[:, :-1]
     Y = data[:, -1]
 
-    np.random.shuffle(data)
+    if shuffle:
+        np.random.shuffle(data)
 
     X_training = X[:training_number, :]
     Y_training = Y[:training_number]
@@ -60,16 +62,37 @@ def load_data(file, sep, training_number, has_headers):
 
 
 def MSE(prediction, Y):
+    """
+    平方误差。用于确定最优划分点、评价回归树的性能。
+    """
     return np.mean(np.square(prediction - Y))
 
 
 def split(X, Y, feature, value):
+    """
+    把数据集根据特征 feature 的取值进行划分、
+    分为不大于 value 和大于 value 的两部分。
+    input:
+        X: 样本集合。
+        Y: 标记集合。
+        feature: 进行划分依赖的特征。
+        value: 对应特征上的分界值。
+    """
     left = (X[:,feature] <= value)
     right = (X[:,feature] > value)
     return X[left], X[right], Y[left], Y[right]
 
 
 def get_partition(X, Y):
+    """
+    计算最佳划分特征及最佳划分点。
+    input:
+        X: 样本集合。
+        Y: 标记集合。
+    output:
+        best_feature: 最佳划分特征。
+        best_value: 最佳划分的值。
+    """
     best_loss = np.inf
     best_feature = None
     best_value = None
@@ -119,17 +142,28 @@ def build_tree(X, Y, level=0) -> tuple:
 
 
 def pretty_show(tree: Node, headers=lambda x: x, level: int=0):
+    """
+    打印回归决策树。（不推荐使用）
+    """
     if tree.is_leaf:
-        print(level * '\t' + 'label: {}'.format(tree.label))
+        print(level * '  ' + 'label: {}'.format(tree.label))
     else:
-        print(level * '\t' + 'partition feature: {}'.format(headers(tree.feature)))
-        print(level * '\t' + 'If value <= {}'.format(tree.value))
+        print(level * '  ' + 'partition feature: {}'.format(headers(tree.feature)))
+        print(level * '  ' + 'If value <= {}'.format(tree.value))
         pretty_show(tree=tree.left, headers=headers, level=level+1)
-        print(level * '\t' + 'If value > {}'.format(tree.value))
+        print(level * '  ' + 'If value > {}'.format(tree.value))
         pretty_show(tree=tree.right, headers=headers, level=level+1)
 
 
 def predict(tree: Node, X: np.matrix):
+    """
+    根据输入数据进行预测。
+    input:
+        tree: 决策树的根节点。
+        X: 测试样本集合。
+    output:
+        对测试样本的预测值。
+    """
     def __predict(__tree: Node, __X):
         if __tree.is_leaf:
             return __tree.label
@@ -151,9 +185,7 @@ mark_X_training, mark_Y_training, mark_X_test, mark_Y_test, mark_headers = load_
     has_headers=True)
 
 mark_tree = build_tree(X=mark_X_training, Y=mark_Y_training)
-pretty_show(mark_tree, lambda x: mark_headers[x])
 mark_prediction = predict(mark_tree, mark_X_test)
-print(MSE(mark_prediction, mark_Y_test))
 
 plt.figure()
 plt.title("Real Label and Prediction in MARK Dataset")
@@ -173,7 +205,6 @@ machine_X_training, machine_Y_training, machine_X_test, machine_Y_test = load_da
 )
 
 machine_tree = build_tree(X=machine_X_training, Y=machine_Y_training)
-pretty_show(machine_tree)
 machine_prediction = predict(machine_tree, machine_X_test)
 
 plt.figure()

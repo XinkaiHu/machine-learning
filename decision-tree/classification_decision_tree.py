@@ -19,7 +19,7 @@ class Node:
         self.right = right
 
 
-def load_data(file, sep, training_number, has_headers):
+def load_data(file, sep, training_number, has_headers: bool, shuffle: bool=True):
     """
     从文件中加载数据。要求数据文件每行包含一个样例且每行最后一个数据为样例标签。
     input:
@@ -31,6 +31,7 @@ def load_data(file, sep, training_number, has_headers):
         X: 每行表示一个样本、每列表示一个样本特征的矩阵。
         Y: 每行表示一个样本标签、列数为 1 的向量。
         headers: 表头。
+        shuffle: 表示是否打乱数据集。默认为 True。
     """
     with open(
             file=file,
@@ -41,6 +42,9 @@ def load_data(file, sep, training_number, has_headers):
             for feature in sample.strip().split(sep=sep)]
             for sample in f.readlines()],
             dtype=np.float64)
+    
+    if shuffle:
+        np.random.shuffle(data)
 
     X = data[:, :-1]
     Y = data[:, -1]
@@ -231,7 +235,7 @@ iris_X_training, iris_Y_training, iris_X_test, iris_Y_test = load_data(
     has_headers=False)
 
 iris_tree = build_tree(X=iris_X_training, Y=iris_Y_training)
-print("========== iris tree ==========")
+print("============== iris tree ==============")
 pretty_show(iris_tree)
 iris_prediction = predict(iris_tree, iris_X_test)
 test(prediction=iris_prediction, Y=iris_Y_test)
@@ -243,7 +247,7 @@ cancer_X_training, cancer_Y_training, cancer_X_test, cancer_Y_test = load_data(
     has_headers=False)
 
 cancer_tree = build_tree(X=cancer_X_training, Y=cancer_Y_training)
-print("========== cancer tree ==========")
+print("============== cancer tree ==============")
 pretty_show(cancer_tree)
 cancer_prediction = predict(cancer_tree, cancer_X_test)
 test(cancer_prediction, cancer_Y_test)

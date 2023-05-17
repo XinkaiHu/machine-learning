@@ -1,8 +1,9 @@
 import math
 import os
+import numpy as np
 
 
-def load_data(file: str, sep: str, has_headers):
+def load_data(file: str, sep: str, has_headers: bool, shuffle: bool=True):
     """
     加载字符串数据、用于分类决策树。
     input:
@@ -13,6 +14,7 @@ def load_data(file: str, sep: str, has_headers):
         X: 每行表示一个样本、每列表示一个样本特征的矩阵。
         Y: 每行表示一个样本标签、列数为 1 的向量。
         headers: 表头。
+        shuffle: 表示是否打乱数据集。默认为 True。
     """
     with open(
             file=file,
@@ -21,6 +23,9 @@ def load_data(file: str, sep: str, has_headers):
             headers = f.readline().strip().split(sep=sep)
         data = [sample.strip().split(sep=sep)
             for sample in f.readlines()]
+    
+    if shuffle:
+        np.random.shuffle(data)
 
     X = [sample[:-1] for sample in data]
     Y = [sample[-1] for sample in data]
@@ -38,7 +43,7 @@ def get_label_space(Y: list) -> list:
     return list(set(Y))
 
 
-def get_sample_space(X: list[list]) -> dict:
+def get_sample_space(X: list) -> dict:
     """
     样本空间。
     """
@@ -246,8 +251,6 @@ def pretty_show(tree, headers = lambda x: x, level = 0):
         for feature_value in tree[1].keys():
             print(level * '\t' + '{}'.format(feature_value))
             pretty_show(tree=tree[1][feature_value], headers=headers, level=level+1)
-
-
 
 
 def predict(tree, X):
