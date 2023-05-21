@@ -26,6 +26,7 @@ def load_data(
             for sample in f.readlines()],
             dtype=np.float64)
 
+    np.random.shuffle(data)
     X = data[:, :-1]
     Y = data[:, -1]
 
@@ -197,7 +198,6 @@ def test(
 ) -> None:
     """
     根据给定的测试集和模型参数、测试模型的正确率。
-    是 test 针对多分类问题的改进。
     input:
         X: 同 load_data 中的 X。
         Y: 同 load_data 中的 Y。
