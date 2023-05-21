@@ -1,3 +1,4 @@
 # machine-learning
 Machine learning labs for CQU machine learning course.
-Environment: Python 3.10.6
+Python version: 3.10.6
+CUDA version: 11.6
