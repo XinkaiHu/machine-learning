@@ -1,3 +1,5 @@
+import os
+
 import torch
 from torch import nn
 from torch import optim
@@ -8,12 +10,17 @@ from torchvision import models
 
 import matplotlib.pyplot as plt
 
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+device = (
+    torch.device(device="cuda")
+    if torch.cuda.is_available()
+    else torch.device(device="cpu")
+)
 print("Device: {}".format(device))
 
 config = {
-    "data_path": "dataset/training",
-    "test_path": "dataset/test",
+    "data_path": os.path.join(__file__, "..", "dataset", "training"),
+    "test_path": os.path.join(__file__, "..", "dataset", "test"),
+    "weights_path": os.path.join(__file__, "..", "model_weights.pth"),
     "data_size": 3616,
     "HEIGHT": 224,
     "WIDTH": 224,
@@ -30,7 +37,7 @@ config = {
     "epoch_size": 150,
     "loss_scale_num": 1024,
     "prefix": "resent-ai",
-    "directory": "./model_resnet",
+    "directory": "model_resnet",
     "save_checkpoint_steps": 10,
 }
 
@@ -91,9 +98,9 @@ plt.grid(visible=False)
 plt.show()
 
 model = models.resnet50()
-model.fc = nn.Linear(2048, 5)
+model.fc = nn.Linear(in_features=2048, out_features=5)
 model.to(device=device)
-model.load_state_dict(torch.load("model_weights.pth"))
+model.load_state_dict(torch.load(f=config["weights_path"]))
 model.eval()
 loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.SGD(
@@ -126,8 +133,6 @@ def test_loop(dataloader, model, loss_fn):
             X = X.to(device)
             y = y.to(device)
             pred = model(X)
-            print(y)
-            print(pred)
             test_loss += loss_fn(pred, y).item()
             correct += (pred.argmax(1) == y).type(torch.float).sum().item()
     test_loss /= num_batches
@@ -135,10 +140,11 @@ def test_loop(dataloader, model, loss_fn):
     print("Accuracy: {}, Avg loss: {}\n".format(correct, test_loss))
 
 
-epoch = 20
+epoch = 1
 for _ in range(epoch):
     print("Epoch {}".format(_))
-    train_loop(training_loader, model, loss_fn, optimizer)
-    torch.save(model.state_dict(), "model_weights.pth")
-
-test_loop(test_loader, model, loss_fn)
+    train_loop(
+        dataloader=training_loader, model=model, loss_fn=loss_fn, optimizer=optimizer
+    )
+    test_loop(dataloader=test_loader, model=model, loss_fn=loss_fn)
+    torch.save(obj=model.state_dict(), f=config["weights_path"])
