@@ -18,4 +18,4 @@ class MyMomentum(optim.Optimizer):
             v = self.v[i]
             for j, param in enumerate(params):
                 v[j] = self.momentum * v[j] - self.lr * param.grad
-                param.data = param.data + v[j]
+                param.data += v[j]

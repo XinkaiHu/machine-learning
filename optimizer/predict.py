@@ -1,7 +1,8 @@
 from sklearn import datasets
+from sklearn.model_selection import train_test_split
 from torch import nn
+from torch import optim
 import torch
-import numpy as np
 import os
 
 from no_optimizer import NoOptimizer
@@ -27,21 +28,6 @@ config = {
 }
 
 
-iris_X, iris_y = datasets.load_iris(return_X_y=True)
-iris_X = torch.tensor(iris_X, dtype=torch.float)
-iris_y = torch.tensor(iris_y, dtype=torch.long)
-
-
-train_idx = np.random.choice(
-    a=config["data_size"],
-    size=config["train_size"],
-    replace=False,
-)
-test_idx = np.array(list(set(range(config["data_size"])) - set(train_idx)))
-data_train = iris_X[train_idx], iris_y[train_idx]
-data_test = iris_X[test_idx], iris_y[test_idx]
-
-
 class Net(nn.Module):
     def __init__(self) -> None:
         super().__init__()
@@ -55,55 +41,207 @@ class Net(nn.Module):
         return x
 
 
-def train(data_train, net, loss_fn, optimizer):
-    X_train, y_train = data_train
-    for batch in range(len(data_train)):
+def train(data, net, loss_fn, optimizer):
+    X_train, y_train = data
+    for batch in range(y_train.shape[0]):
         pred = net(X_train[batch])
         loss = loss_fn(pred, y_train[batch])
 
+        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        optimizer.zero_grad()
-
-        if batch % 10 == 0:
-            print(
-                "loss: {}, pred: {}, actual: {}".format(
-                    loss.data, torch.argmax(pred.data), y_train[batch]
-                )
-            )
 
 
-net = Net()
+def test(data, net, loss_fn):
+    X_train, y_train = data
+    loss = 0
+    currect = 0
+    with torch.no_grad():
+        for batch in range(y_train.shape[0]):
+            pred = net(X_train[batch])
+            loss += loss_fn(pred, y_train[batch])
+            if torch.argmax(pred) == y_train[batch]:
+                currect += 1
+    loss /= y_train.shape[0]
+    currect /= y_train.shape[0]
+    return loss, currect
+
+
+iris_X, iris_y = datasets.load_iris(return_X_y=True)
+X_training, X_test, y_training, y_test = train_test_split(
+    iris_X, iris_y, test_size=config["test_size"], train_size=config["train_size"]
+)
+X_training = torch.tensor(X_training, dtype=torch.float)
+X_test = torch.tensor(X_test, dtype=torch.float)
+y_training = torch.tensor(y_training, dtype=torch.long)
+y_test = torch.tensor(y_test, dtype=torch.long)
+
+
+net0 = Net()
+net1 = Net()
+net2 = Net()
+net3 = Net()
+net4 = Net()
+net5 = Net()
+net6 = Net()
 loss_fn = nn.CrossEntropyLoss()
 
 no_optimizer = NoOptimizer(
-    params=net.parameters(),
+    params=net0.parameters(),
 )
 
 my_sgd = MySGD(
-    params=net.parameters(),
-    lr=0.01,
+    params=net1.parameters(),
+    lr=0.05,
+)
+
+sgd = optim.SGD(
+    params=net2.parameters(),
+    lr=0.05,
+    momentum=0.0,
 )
 
 my_momentum = MyMomentum(
-    params=net.parameters(),
+    params=net3.parameters(),
+    lr=0.01,
+    momentum=0.9,
+)
+
+momentum = optim.SGD(
+    params=net4.parameters(),
     lr=0.01,
     momentum=0.9,
 )
 
 my_adam = MyAdam(
-    params=net.parameters(),
-    lr=0.01,
+    params=net5.parameters(),
+    lr=0.001,
     beta1=0.9,
     beta2=0.99,
     epsilon=1e-8,
 )
 
-epoch = 15
+adam = optim.Adam(
+    params=net6.parameters(),
+    lr=0.001,
+    betas=[
+        0.9,
+        0.99,
+    ],
+    eps=1e-8,
+)
+
+epoch = 10
+print("=========== No optimizer ===========")
 for _ in range(epoch):
     train(
-        data_train=data_train,
-        net=net,
+        data=(X_training, y_training),
+        net=net0,
+        loss_fn=loss_fn,
+        optimizer=no_optimizer,
+    )
+
+    test_loss, test_accuracy = test(
+        data=(X_test, y_test),
+        net=net0,
+        loss_fn=loss_fn,
+    )
+
+    print("Epoch {}:\tLoss is {},\taccuracy is {}".format(_, test_loss, test_accuracy))
+print("=========== My SGD ===========")
+for _ in range(epoch):
+    train(
+        data=(X_training, y_training),
+        net=net1,
+        loss_fn=loss_fn,
+        optimizer=my_sgd,
+    )
+
+    test_loss, test_accuracy = test(
+        data=(X_test, y_test),
+        net=net1,
+        loss_fn=loss_fn,
+    )
+
+    print("Epoch {}:\tLoss is {},\taccuracy is {}".format(_, test_loss, test_accuracy))
+print("=========== PyTorch SGD ===========")
+for _ in range(epoch):
+    train(
+        data=(X_training, y_training),
+        net=net2,
+        loss_fn=loss_fn,
+        optimizer=sgd,
+    )
+
+    test_loss, test_accuracy = test(
+        data=(X_test, y_test),
+        net=net2,
+        loss_fn=loss_fn,
+    )
+
+    print("Epoch {}:\tLoss is {},\taccuracy is {}".format(_, test_loss, test_accuracy))
+print("=========== My Momentum ===========")
+for _ in range(epoch):
+    train(
+        data=(X_training, y_training),
+        net=net3,
+        loss_fn=loss_fn,
+        optimizer=my_momentum,
+    )
+
+    test_loss, test_accuracy = test(
+        data=(X_test, y_test),
+        net=net3,
+        loss_fn=loss_fn,
+    )
+
+    print("Epoch {}:\tLoss is {},\taccuracy is {}".format(_, test_loss, test_accuracy))
+print("=========== PyTorch Momentum ===========")
+for _ in range(epoch):
+    train(
+        data=(X_training, y_training),
+        net=net4,
+        loss_fn=loss_fn,
+        optimizer=momentum,
+    )
+
+    test_loss, test_accuracy = test(
+        data=(X_test, y_test),
+        net=net4,
+        loss_fn=loss_fn,
+    )
+
+    print("Epoch {}:\tLoss is {},\taccuracy is {}".format(_, test_loss, test_accuracy))
+print("=========== My Adam ===========")
+for _ in range(epoch):
+    train(
+        data=(X_training, y_training),
+        net=net5,
         loss_fn=loss_fn,
         optimizer=my_adam,
     )
+
+    test_loss, test_accuracy = test(
+        data=(X_test, y_test),
+        net=net5,
+        loss_fn=loss_fn,
+    )
+
+    print("Epoch {}:\tLoss is {},\taccuracy is {}".format(_, test_loss, test_accuracy))
+print("=========== PyTorch Adam ===========")
+for _ in range(epoch):
+    train(
+        data=(X_training, y_training),
+        net=net6,
+        loss_fn=loss_fn,
+        optimizer=adam,
+    )
+
+    test_loss, test_accuracy = test(
+        data=(X_test, y_test),
+        net=net6,
+        loss_fn=loss_fn,
+    )
+
+    print("Epoch {}:\tLoss is {},\taccuracy is {}".format(_, test_loss, test_accuracy))
+print("=========== End ===========")

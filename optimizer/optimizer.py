@@ -115,35 +115,11 @@ def Adam(x_traj, lr, beta1, beta2, epsilon, m, v):
 
 x_traj = [(step_x1, step_x2)]
 v = (0, 0)
-G = (0, 0)
 m = (0, 0)
 
 for _ in range(10000):
-    # x_traj = SGD(
-    #     x_traj=x_traj,
-    #     lr=0.01
-    # )
-    # x_traj, v = Momentum(
-    #     x_traj=x_traj,
-    #     lr=0.01,
-    #     momentum=0.9,
-    #     v=v
-    # )
-    # x_traj, G = AdaGrad(
-    #     x_traj=x_traj,
-    #     lr=0.1,
-    #     epsilon=1e-8,
-    #     G=G
-    # )
-    # x_traj, v = RMSProp(
-    #     x_traj=x_traj,
-    #     lr=0.01,
-    #     momentum=0.9,
-    #     epsilon=1e-8,
-    #     v=v
-    # )
     x_traj, m, v = Adam(
-        x_traj=x_traj, lr=0.01, beta1=0.9, beta2=0.99, epsilon=1e-8, m=m, v=v
+        x_traj=x_traj, lr=0.001, beta1=0.9, beta2=0.99, epsilon=1e-8, m=m, v=v
     )
 print(x_traj[-1])
 gd_plot(x_traj)

@@ -19,15 +19,9 @@ class MyAdam(optim.Optimizer):
     def step(self):
         for i, param_group in enumerate(self.param_groups):
             params = param_group["params"]
-            v = self.v[i]
             m = self.m[i]
+            v = self.v[i]
             for j, param in enumerate(params):
-                m[j] = (self.beta1 * m[j] + (1 - self.beta1) * param.grad) / (
-                    1 - self.beta1
-                )
-                v[j] = (self.beta2 * v[j] + (1 - self.beta2) * param.grad**2) / (
-                    1 - self.beta2
-                )
-                param.data = param.data - (
-                    self.lr * m[j] / (v[j] ** (1 / 2) + self.epsilon)
-                )
+                m[j] = self.beta1 * m[j] + (1 - self.beta1) * param.grad
+                v[j] = self.beta2 * v[j] + (1 - self.beta2) * torch.square(param.grad)
+                param.data -= self.lr * m[j].div(self.epsilon + torch.sqrt(v[j]))
