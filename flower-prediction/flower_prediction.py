@@ -67,8 +67,6 @@ test_transform = transforms.Compose(
 )
 
 
-# 由于 PTA 网站的文件传输限制，数据集无法提交。
-# 所以这里直接用训练好的参数对实验要求的 3 张图片进行分类
 training_data = datasets.ImageFolder(
     root=config["training_path"],
     transform=training_transform,
