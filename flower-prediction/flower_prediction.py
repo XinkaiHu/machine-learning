@@ -67,6 +67,8 @@ test_transform = transforms.Compose(
 )
 
 
+# 由于 PTA 网站的文件传输限制，数据集无法提交。
+# 所以这里直接用训练好的参数对实验要求的 3 张图片进行分类
 training_data = datasets.ImageFolder(
     root=config["training_path"],
     transform=training_transform,
@@ -148,6 +150,7 @@ def test_loop(dataloader, model, loss_fn):
     print("Accuracy: {}, Avg loss: {}\n".format(correct, avg_loss))
 
 
+
 model = models.resnet50()
 model.fc = nn.Linear(in_features=2048, out_features=5)
 model.to(device=device)
@@ -164,7 +167,8 @@ optimizer = optim.SGD(
 )
 optimizer.load_state_dict(state_dict=torch.load(f=config["optimizer_path"]))
 
-epoch = 0
+
+epoch = 10
 
 for _ in range(epoch):
     print("Epoch {}".format(_))
@@ -201,16 +205,16 @@ plt.legend()
 plt.show()
 
 
-class_map = training_data.classes
+class_map = ["daisy", "dandelion", "roses", "sunflowers", "tulips"]
 
 rose = Image.open(
-    fp=os.path.join(__file__, "..", "dataset", "test", "roses", "rose.jpg")
+    fp=os.path.join(__file__, "..", "test", "rose.jpg")
 )
 sunflower = Image.open(
-    fp=os.path.join(__file__, "..", "dataset", "test", "sunflowers", "sunflower.jpg")
+    fp=os.path.join(__file__, "..", "test", "sunflower.jpg")
 )
 tulips = Image.open(
-    fp=os.path.join(__file__, "..", "dataset", "test", "tulips", "tulips.jpg")
+    fp=os.path.join(__file__, "..", "test", "tulips.jpg")
 )
 
 rose = test_transform(rose)
